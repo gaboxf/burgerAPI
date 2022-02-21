@@ -5,12 +5,14 @@ Aquí unas querys y casos de uso en postman para ahorrar tiempo en el test de la
 ## Querys
 
 CREATE DATABASE burger;
+
 USE burger;
+
 CREATE TABLE burgers (
 	idBurger integer PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name varchar(60),
-    ingredients varchar(999),
-    price integer
+    	name varchar(60),
+    	ingredients varchar(999),
+    	price integer
 );
 
 INSERT INTO burgers (name, ingredients, price) VALUES("Doble American Cheese", "doble medallon de carne, doble cheddar, lechuga, cebolla morada, aderezo", 500);
