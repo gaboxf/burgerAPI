@@ -1,0 +1,11 @@
+#%RAML 1.0 DataType
+
+type: object
+properties:
+  idBurger: integer
+  name: string
+  ingredients:
+    type: array
+    items: string
+    minItems: 2
+  price: integer

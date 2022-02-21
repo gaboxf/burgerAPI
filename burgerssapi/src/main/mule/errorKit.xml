@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="errorKitDB_Handler" doc:id="f812c363-5337-4ac5-b895-24549a86f84e" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6f13d883-d887-4b68-a23a-ee09c444afe2" type="ANY">
+			<ee:transform doc:name="Transform Message" doc:id="fb70fcef-5207-4dfc-983e-847e998b683f">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1908bc16-3f57-4470-b6d9-3018da65860c" type="DB:BAD_SQL_SYNTAX">
+				<ee:transform doc:name="Transform Message" doc:id="6b4c88ee-f83e-4c60-b8b6-6d41c3e1616d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="c634f1b8-6fb7-481e-b291-b81b5adb08fe" type="DB:CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="cd77048b-570b-442f-b650-24c2b4045d3f">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7e4a08ca-e335-4060-b067-47cc5f7baa3a" type="DB:QUERY_EXECUTION">
+				<ee:transform doc:name="Transform Message" doc:id="7281f627-c2a6-404f-9431-e5f6f19cb98f">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+	</error-handler>
+</mule>

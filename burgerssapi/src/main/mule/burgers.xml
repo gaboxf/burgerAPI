@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="delete:\delete\(byId):burgersapi-config">
+        <db:delete doc:name="Del burger by id" doc:id="9f2b4019-96e0-4e41-af98-ff2bf3fc7601" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM burgers WHERE idBurger= :idBurger]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{idBurger: attributes.uriParams.byId}]]]></db:input-parameters>
+		</db:delete>
+		<error-handler ref="errorKitDB_Handler" />
+    
+</flow>
+    <flow name="patch:\update\(byId):application\json:burgersapi-config">
+		<db:update doc:name="Modify burger by id" doc:id="846fb81e-cd18-478b-b7d5-c7372c695852" config-ref="Database_Config">
+			<db:sql><![CDATA[UPDATE burgers SET name= :name, ingredients= :ingredients, price= :price WHERE idBurguer= :id]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	
+	name: payload.name,
+	ingredients: payload.ingredients joinBy ",",
+	price: payload.price
+}]]]></db:input-parameters>
+		</db:update>
+		<error-handler ref="errorKitDB_Handler" />
+    
+</flow>
+    <flow name="post:\insert:application\json:burgersapi-config">
+		<foreach doc:name="For Each" doc:id="25fd0fc4-125d-4882-9e50-71cacfb3115b" collection="#[payload]" counterVariableName="idx">
+			<db:insert doc:name="Add burger" doc:id="220f8bfd-c9f0-4183-9b6d-e6be24791f57" config-ref="Database_Config">
+			<db:sql><![CDATA[INSERT INTO burgers (name, ingredients, price) VALUES (:name, :ingredients, :price)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	name: payload.name,
+	ingredients: payload.ingredients joinBy ",",
+	price: payload.price
+}]]]></db:input-parameters>
+		</db:insert>
+		</foreach>
+		<error-handler ref="errorKitDB_Handler" />
+
+    </flow>
+    <flow name="get:\select\byIngredients:burgersapi-config">
+		<choice doc:name="Ingredients check" doc:id="3e2eef38-3f93-490e-802d-4a2860551471" >
+			<when expression="#[attributes.queryParams.ingredient1 != null or attributes.queryParams.ingredient2 != null]">
+				<db:select doc:name="List burgers with this ingredient" doc:id="348b3f2c-f62e-450c-93f0-861c0e7a3dd9" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT idBurger, name, ingredients, price FROM burgers WHERE ingredients LIKE "%":ingredient"%"]]></db:sql>
+			<db:input-parameters><![CDATA[#[if (attributes.queryParams.ingredient1 != null) (ingredient: attributes.queryParams.ingredient1) else (ingredient: attributes.queryParams.ingredient2)]]]></db:input-parameters>
+		</db:select>
+			</when>
+			<otherwise >
+				<db:select doc:name="by two ingredients" doc:id="96a6265f-09aa-4955-854c-247e3e0c3c73" config-ref="Database_Config">
+					<db:sql ><![CDATA[SELECT idBurger, name, ingredients, price FROM burgers WHERE ingredients LIKE "%":ingredient1"%" OR "%":ingredient2"%"]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	ingredient1: attributes.queryParams.ingredient1,
+	ingredient2: attributes.queryParams.ingredient2
+}]]]></db:input-parameters>
+				</db:select>
+			</otherwise>
+		</choice>
+		<flow-ref doc:name="SubFlow DbToJson" doc:id="4fdf33fc-cf25-4afe-ba56-a877b5abcd25" name="dbToJson" />
+		<error-handler ref="errorKitDB_Handler" />
+    
+</flow>
+    <flow name="get:\select:burgersapi-config">
+		<db:select doc:id="b8a25aaf-e421-462c-b446-9a00f93788ad" config-ref="Database_Config" doc:name="List all burgers">
+			<db:sql><![CDATA[SELECT idBurger, name, ingredients, price FROM burgers]]></db:sql>
+		</db:select>
+		<flow-ref doc:name="SubFlow DbToJson" doc:id="a2092d0b-fc18-4cff-b01a-954a6229c7af" name="dbToJson"/>
+		<error-handler ref="errorKitDB_Handler" />
+    
+</flow>
+    <flow name="get:\select\(byId):burgersapi-config">
+        <db:select doc:name="List burger by id" doc:id="41217fe4-a2a4-4408-ad62-5c2f0c139ca1" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT idBurger, name, ingredients, price FROM burgers WHERE idBurger= :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: attributes.uriParams.byId
+}]]]></db:input-parameters>
+		</db:select>
+		<flow-ref doc:name="SubFlow DbToJson" doc:id="2011c496-53da-4c0b-bc55-2c024bc07e22" name="dbToJson" />
+		<error-handler ref="errorKitDB_Handler" />
+    
+</flow>
+	<sub-flow name="dbToJson" doc:id="9b00c4fc-d70b-434a-b1fd-3946dbd5fa5a" >
+		<set-payload value="#[message.payload]" doc:name="Set Payload" doc:id="24dd00c0-4251-4762-905d-c170b98c12ee" />
+		<ee:transform doc:name="Transform Message" doc:id="ac0b0d17-19e7-498d-b8a5-ade02ee4e17f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+
+</mule>

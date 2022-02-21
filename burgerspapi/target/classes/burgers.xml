@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="delete:\burgers\(id):burgerpapi-config">
+        <http:request method="GET" doc:name="to SAPI" doc:id="823fb1d9-241e-4295-bbf2-0a84bf6d076d" config-ref="HTTP_Request_configuration" path="/delete/{byId}">
+			<http:uri-params ><![CDATA[#[{id: attributes.uriParams.id}]]]></http:uri-params>
+		</http:request>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  Message: "Burger has been deleted successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="patch:\burgers\(id):application\json:burgerpapi-config">
+        <http:request method="GET" doc:name="to SAPI" doc:id="526c4277-f3ab-4515-9c4d-97f1555d2c26" config-ref="HTTP_Request_configuration" path="/update/{byId}">
+			<http:uri-params ><![CDATA[#[{
+	byId: attributes.uriParams.id
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  Message: "Burger has been updated successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="post:\burgers:application\json:burgerpapi-config">
+        <http:request method="POST" doc:name="to SAPI" doc:id="dc6b5f79-a215-4224-8c9c-f0dea06dce6a" config-ref="HTTP_Request_configuration" path="/insert"/>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+   Message: "Burger has been created successfully"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="get:\burgers:burgerpapi-config">
+		<http:request method="GET" doc:name="to SAPI" doc:id="e05284d1-e223-4cc5-84f9-dac1da231129" config-ref="HTTP_Request_configuration" path="/select">
+			<http:query-params ><![CDATA[#[{
+	(price: attributes.queryParams.price) if (attributes.queryParams.price != null)
+}]]]></http:query-params>
+		</http:request>
+		<choice doc:name="Price check" doc:id="a2fc7fd4-2e42-4489-a238-55e6871b1e19" >
+			<when expression="#[vars.price != null]">
+				<ee:transform doc:name="Price filter" doc:id="42002e0a-a940-4533-92a1-52bf796c3122" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var object = payload.price
+---
+payload filter (object, index) -> (object.price <= vars.price as Number)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Without filter" doc:id="6426053e-1267-444f-997e-75fbfeb755e7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<flow-ref doc:name="SubFlow SetOrder" doc:id="e58e1ff7-d9b6-4e18-ad13-a651c3d083a5" name="burgersSetOrder"/>
+		<flow-ref doc:name="SubFlow SetFormat" doc:id="f51c9fa6-51e7-414d-aa6a-675c68a139bc" name="burgersSetFormat"/>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="get:\burgers\(id):burgerpapi-config">
+        <http:request method="GET" doc:name="to SAPI" doc:id="cf0ab665-7e7e-4cbd-a043-942bfcac3a39" config-ref="HTTP_Request_configuration" path="/select/{byId}">
+			<http:uri-params><![CDATA[#[{byId: attributes.uriParams.id}]]]></http:uri-params>
+		</http:request>
+		<flow-ref doc:name="SubFlow Set Format" doc:id="d74940bf-7684-41d4-b518-e4b799095b6d" name="burgersSetFormat" />
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+	<flow name="get:\burgers\ingredients:burgerpapi-config">
+        <http:request method="GET" doc:name="to SAPI" doc:id="e20c3aa7-faf9-46d1-b925-8e2c0eaddca7" config-ref="HTTP_Request_configuration" path="/select/byIngredients">
+			<http:query-params ><![CDATA[#[{
+	(ingredient1: attributes.queryParams.ingredient1) if (attributes.queryParams.ingredient1 != null),
+	(ingredient2: attributes.queryParams.ingredient2) if (attributes.queryParams.ingredient2 != null)
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Map JSON">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(elem, idx) -> {
+		idBurger: elem.idBurger,
+		name: elem.name,
+		ingredients: elem.ingredients,
+		price: elem.price
+	}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+	<sub-flow name="burgersSetOrder" doc:id="dff49211-29be-4ddb-86a8-71a80b8bead9" >
+		<set-payload value="#[message.payload]" doc:name="Set Payload" doc:id="ca665546-19c3-4e72-b0c5-cf1a7ec2bf18" mimeType="application/json"/>
+		<choice doc:name="Order check" doc:id="07bed39b-5a8c-4043-af97-bb95845bc5b3" >
+			<when expression="#[vars.order != null]">
+				<ee:transform doc:name="Set order" doc:id="eb960c30-7d5d-425a-a7b8-c96804af861f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if(vars.order == 'asc') (payload orderBy $.price) else (payload orderBy -$.price)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Without order" doc:id="c5473775-2e96-4b52-a54f-b51d97f5b7f8" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<sub-flow name="burgersSetFormat" doc:id="7387554b-c97f-4d4c-81fc-d1c34d70e3b3" >
+		<set-payload value="#[message.payload]" doc:name="Set Payload" doc:id="0e281324-52b0-49e8-b50d-eab02163c5ae" />
+		<choice doc:name="Format check" doc:id="71a78188-55dd-40b4-84a1-e4da2285b55b" >
+			<when expression="#[lower(vars.format) == 'xml']">
+				<ee:transform doc:name="to XML" doc:id="d4f50f10-63cc-49ea-a277-e055b9de4a82" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	burgers: ( 
+		burger: payload map(elem, idx) -> {
+			idBurger: elem.idBurger,
+			name: elem.name,
+			ingredients: elem.ingredients,
+			price: elem.price
+		}
+	)
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="to JSON" doc:id="cb2bebf0-810d-45e4-ae8a-23b77dbe325f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(elem, idx) -> {
+		idBurger: elem.idBurger,
+		name: elem.name,
+		ingredients: elem.ingredients,
+		price: elem.price
+	}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</sub-flow>
+
+</mule>

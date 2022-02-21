@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="delete:\burgers\(id):burgerxapi-config">
+        <http:request method="DELETE" doc:name="to PAPI" doc:id="d9554d30-86a6-441d-8cfd-9589641ef3b7" config-ref="HTTP_Request_configuration" path="/burgers/{id}">
+			<http:uri-params ><![CDATA[#[{id: attributes.uriParams.id}]]]></http:uri-params>
+		</http:request>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="patch:\burgers\(id):application\json:burgerxapi-config">
+        <http:request method="PATCH" doc:name="Request" doc:id="22cef0de-587f-430a-a9e2-9dff2df9486f" config-ref="HTTP_Request_configuration" path="/burgers">
+			<http:uri-params ><![CDATA[#[{
+	id: attributes.uriParams.id
+}]]]></http:uri-params>
+		</http:request>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="post:\burgers:application\json:burgerxapi-config">
+        <http:request method="POST" doc:name="to PAPI" doc:id="bbfa1e7a-1a3b-4464-b035-88ff76b745b6" config-ref="HTTP_Request_configuration" path="/burgers"/>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="get:\burgers:burgerxapi-config">
+        <http:request method="GET" doc:name="to PAPI" doc:id="9e905e22-82c5-43e6-9d55-6d02888ba886" config-ref="HTTP_Request_configuration" path="/burgers">
+			<http:query-params ><![CDATA[#[{
+	(price: attributes.queryParams.price) if (attributes.queryParams.price != null),
+	(order: attributes.queryParams.order) if (attributes.queryParams.order != null),
+	(format: attributes.queryParams.format) if (attributes.queryParams.format != null)
+}]]]></http:query-params>
+		</http:request>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+    <flow name="get:\burgers\(id):burgerxapi-config">
+        <http:request method="GET" doc:name="to PAPI" doc:id="dcbfb0c4-0388-4533-9db9-ebb9dbfb6d51" config-ref="HTTP_Request_configuration" path="/burgers/{id}">
+			<http:uri-params><![CDATA[#[{id: attributes.uriParams.id}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[{
+	(format: attributes.queryParams.format) if (attributes.queryParams.format != null)
+}]]]></http:query-params>
+		</http:request>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+	<flow name="get:\burgers\ingredients:burgerxapi-config">
+        <http:request method="GET" doc:name="to PAPI" doc:id="70d5bd9b-60ed-4e11-8dfb-92cf8e175eec" config-ref="HTTP_Request_configuration" path="/burgers/ingredients">
+			<http:query-params ><![CDATA[#[{
+	(ingredient1: attributes.queryParams.ingredient1) if (attributes.queryParams.ingredient1 != null),
+	(ingredient2: attributes.queryParams.ingredient2) if (attributes.queryParams.ingredient2 != null)
+}]]]></http:query-params>
+		</http:request>
+		<error-handler ref="errorKitError_Handler" />
+    
+</flow>
+</mule>

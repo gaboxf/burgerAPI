@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="errorKitError_Handler" doc:id="e611e666-5463-4510-89c3-b82efdd27faa" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a659c29a-6ea6-44ef-9798-aa02c4ea6825" type="HTTP:PARSING, HTTP:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform doc:name="Transform Message" doc:id="5e031c22-943a-4c92-9575-3e262ee8251c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="84482d68-baee-4569-9d94-452e56691883" type="HTTP:BAD_GATEWAY, HTTP:CONNECTIVITY, HTTP:INTERNAL_SERVER_ERROR, HTTP:TIMEOUT">
+				<ee:transform doc:name="Transform Message" doc:id="c38674a4-c741-4587-b79b-f70fb2b01e10" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="b48cef87-305f-430c-8668-9cc85687c264" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="3948a0c0-1119-45fd-8d5c-04b4e76a2ee2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType: {
+		errorId: error.errorType.identifier,
+		errorName: error.errorType.namespace
+	},
+	errorDescription: error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+	</error-handler>
+</mule>

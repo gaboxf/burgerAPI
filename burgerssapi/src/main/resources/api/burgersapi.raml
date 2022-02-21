@@ -1,0 +1,161 @@
+#%RAML 1.0
+title: burgerSAPI
+
+types:
+  burger: !include types/burger.raml
+  burgerNoID: !include types/burgerNoID.raml
+  formatType:
+    type:
+      enum:
+        - json
+        - xml
+/select:
+  get:
+    queryParameters:
+      price?: integer
+      order?:
+        type:
+          enum: [asc, des]
+      format?: formatType
+    displayName: Get burgers
+    description: Muestra un listado de las hamburguesas de la base de datos
+    responses:
+      200:
+        body:
+          application/json:
+            type: burger[]
+            examples:
+              output: !include examples/burgersEx.raml
+      400:
+        body:
+          application/json:
+            example:
+              {
+                "Message": "Bad request"
+              }
+  /byIngredients:
+    get:
+      queryParameters:
+        ingredient1?: string
+        ingredient2?: string
+      displayName: Get burgers by ingredients
+      description: Muestra un listado de las hamburguesas de la base de datos
+      responses:
+        200:
+          body:
+            application/json:
+              type: burger[]
+              examples:
+                output: !include examples/burgersEx.raml
+        400:
+          body:
+            application/json:
+              example:
+                {
+                  "Message": "Bad request"
+                }
+  /{byId}:
+    uriParameters:
+      byId:
+        type: integer
+    get:
+      queryParameters:
+        format?: formatType
+      displayName: Get burger
+      description: Muestra una hamburguesa de la base de datos
+      responses:
+        200:
+          body:
+            application/json:
+              type: burger
+              example: !include examples/burgerEx.raml
+        400:
+          body:
+            application/json:
+              example:
+                {
+                  "Message": "Bad request"
+                } 
+        500:
+          body:
+            application/json:
+              example:
+                {
+                  "Message": "Internal server error"
+                } 
+/insert:  
+  post:
+    displayName: Post burgers
+    description: Ingresa una hamburguesa de la base de datos
+    body:
+      application/json:
+        type: burgerNoID[]
+        examples: 
+          input: !include examples/burgersNoIDEx.raml
+    responses:
+      201:
+        body:
+          application/json:
+            example:
+              output:
+                {
+                  "Message": "Burger has been created successfully"
+                }
+      400:
+        body:
+          application/json:
+            example:
+              output:
+                {
+                  "Message": "Bad request"
+                }
+/update:  
+  /{byId}:
+    uriParameters:
+      byId:
+        type: integer
+    patch:
+      displayName: Update burger by id
+      description: Modifica una burger exitente
+      body:
+        application/json:
+          type: burgerNoID
+          example: !include examples/burgerNoIDEx.raml
+      responses:
+        201:
+          body:
+            application/json:
+              example: 
+                {
+                  "Message": "Burger has been updated successfully"
+                }
+        400:
+          body:
+            application/json:
+              example:
+                {
+                  "Message": "Bad request"
+                }
+/delete:
+  /{byId}:
+    uriParameters:
+      byId:
+        type: integer
+    delete:
+      displayName: Delete a burger
+      description: Elimina una burger exitente
+      responses:
+        200:
+          body:
+            application/json:
+              example: 
+                {
+                  "Message": "Burger has been deleted successfully"
+                }
+        400:
+          body:
+            application/json:
+              example:
+                {
+                  "Message": "Bad request"
+                }
