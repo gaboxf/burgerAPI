@@ -14,7 +14,9 @@ CREATE TABLE burgers (
 );
 
 INSERT INTO burgers (name, ingredients, price) VALUES("Doble American Cheese", "doble medallon de carne, doble cheddar, lechuga, cebolla morada, aderezo", 500);
+
 INSERT INTO burgers (name, ingredients, price) VALUES("Doble Cheese Bacon", "doble medallon de carne, doble cheddar, bacon, pepinillos, cebolla morada, aderezo de la casa", 300);
+
 INSERT INTO burgers (name, ingredients, price) VALUES("Burger Argentina", "doble medallon de carne, jamon, queso, lechuga, tomate, huevo, aderezo", 450);
 
 SELECT idBurger, name as Nombre, ingredients as Ingredientes, price as Precio FROM burgers;
